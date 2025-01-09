@@ -14,25 +14,16 @@ export class CorePipeline {
 		this.results;// actually never neee now... would it be of interest?
 	}
 
+
+
 	// Add method/operation to the pipeline - queue
 	add(method, ...args) {
-		this._checkConsumed("add");
+		this.#checkConsumed("add");
 
 		// TODO hm maybe just expose asyncAdd when cleaning
 		// Mark pipeline as async if any async method
 		if (!this._isAsync) {
-			const methodString = method.toString();
-
-			// Remove both single-line and multi-line comments
-			const withoutComments = methodString.replace(/\/\/.*$|\/\*[\s\S]*?\*\//gm, '');
-			const isUsingPromise = withoutComments.includes("Promise");
-
-			// Check if the function is explicitly marked as async
-			const isExplicitAsync = method.constructor.name === "AsyncFunction";
-
-			if (isExplicitAsync || isUsingPromise) {
-				this._isAsync = true;
-			}
+			this.#detectAsync(method)
 		}
 
 		this._queue.push({ method, args });
@@ -40,12 +31,12 @@ export class CorePipeline {
 	}
 
 	// METHODS TO EXECUTE OPERATIONS IN QUEUE - an remove executed one
-	_executeSync() {
+	#executeSync() {
 		const { method, args } = this._queue.shift();
 		this._value = method(this._value, ...args);
 	}
 
-	async _executeAsync() {
+	async #executeAsync() {
 		const { method, args } = this._queue.shift();
 		let result = method(this._value, ...args);
 
@@ -61,69 +52,69 @@ export class CorePipeline {
 
 	// Process the entire pipeline and return the final result
 	end() {
-		this._checkConsumed("end");
+		this.#checkConsumed("end");
 		this._isConsumed = true;
 
-		return !this._isAsync ? this._syncEnd() : this._asyncEnd();
+		return !this._isAsync ? this.#syncEnd() : this.#asyncEnd();
 	}
 
 	//Loop an return an array of intermediate results - apply callback if provied
 	loop(callback) {
-		this._checkConsumed("loop");
+		this.#checkConsumed("loop");
 		this._isConsumed = true;
 
 		return this._isAsync
-			? this._asyncLoop(callback)
-			: this._syncLoop(callback);
+			? this.#asyncLoop(callback)
+			: this.#syncLoop(callback);
 	}
 
 	// Step through results, access step value as next().value
 	next(callback) {
-		this._checkConsumed("next");
+		this.#checkConsumed("next");
 		return !this._isAsync
-			? this._syncNext(callback)
-			: this._asyncNext(callback);
+			? this.#syncNext(callback)
+			: this.#asyncNext(callback);
 	}
 
 	// Internal methods to handle execution - types
 
 	// Process the pipeline synchronously
 	// END() - returning final value
-	_syncEnd() {
+	#syncEnd() {
 		while (this._queue.length > 0) {
-			this._executeSync();
+			this.#executeSync();
 		}
 		return this._value;
 	}
 
-	async _asyncEnd() {
+	async #asyncEnd() {
 		while (this._queue.length > 0) {
-			await this._executeAsync();
+			await this.#executeAsync();
 		}
 		return this._value;
 	}
 
 	// LOOP()
 	// intermediate results in callback (switch to result array?), returns final value when done
-	_syncLoop(callback) {
+	#syncLoop(callback) {
 		while (this._queue.length > 0) {
-			this._executeSync();
+			this.#executeSync();
 			callback(this._value);
 		}
 		return this._value;
 	}
 
-	async _asyncLoop(callback) {
+	async #asyncLoop(callback) {
 		while (this._queue.length > 0) {
-			await this._executeAsync();
+			await this.#executeAsync();
 			callback(this._value);
 		}
 		return this._value;
 	}
 
 	// NEXT
-	_syncNext(callback) {
-		this._checkConsumed();
+	#syncNext(callback) {
+		this.#checkConsumed();
 
 		const { method, args } = this._queue.shift();
 		this._value = method(this._value, ...args);
@@ -135,7 +126,7 @@ export class CorePipeline {
 
 		return this;
 	}
-	async _asyncNext(callback) {
+	async #asyncNext(callback) {
 		const { method, args } = this._queue.shift();
 		let result = method(this._value, ...args);
 
@@ -155,13 +146,33 @@ export class CorePipeline {
 	}
 
 	// Ensure the pipeline hasn't already been consumed
-	_checkConsumed(method) {
+	#checkConsumed(method) {
 		if (this._isConsumed) {
 			throw new Error(
 				`Pipeline has already been consumed. Cannot execute '${method}'.`
 			);
 		}
 	}
+	// ugly helper to mark as async if any
+	#detectAsync(method) {
+		// Check if the function is explicitly marked as async
+		const isExplicitAsync = method.constructor.name === "AsyncFunction";
+
+		if (isExplicitAsync) {
+			this._isAsync = true;
+		} else {
+			// Remove both single-line and multi-line comments
+			const isUsingPromise = method.toString()
+				.replace(/\/\/.*$|\/\*[\s\S]*?\*\//gm, '')// remove comments
+				.replace(/(['"`]).*?\1/g, '') // remove strings inside function
+				.includes("Promise");// check for
+
+			if (isUsingPromise) {
+				this._isAsync = true;
+			}
+		}
+	}
+
 
 	// Helper to get the current value
 	get value() {
