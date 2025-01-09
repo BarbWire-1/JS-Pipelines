@@ -8,22 +8,22 @@ import { getProps } from "./devUtils/debug.js";
 
 globalThis.LOGPROPS = false;
 globalThis.DEVMODE = true;
-if(DEVMODE)
-window.onerror = function (message, source, line, stack, error) {
-	console.log(
-		"An error occurred:\n",
-		message,
-		"at line:",
-		line,
-		"in file:\n",
-		source.trim(),
-		'\n',
-		"ERROR STACK: \n",
-		error.stack.split('\n').splice(1).map(s => s.trim()).join('\n')
-	);
-	// Prevent default handling of the error
-	return true;
-};
+if (DEVMODE)
+	window.onerror = function (message, source, line, stack, error) {
+		console.log(
+			"An error occurred:\n",
+			message,
+			"at line:",
+			line,
+			"in file:\n",
+			source.trim(),
+			'\n',
+			"ERROR STACK: \n",
+			error.stack.split('\n').splice(1).map(s => s.trim()).join('\n')
+		);
+		// Prevent default handling of the error
+		return true;
+	};
 
 // create an extening class on Pipeline manually ith on methods on value
 class MathPipeline extends Pipeline {
@@ -83,24 +83,24 @@ function addValue2(value, amount) {
 	return value + amount;
 }
 MathPipeline.addPlugin(addValue2);
-LOGPROPS &&console.log("MathPipeline after creation", getProps(MathPipeline))
+LOGPROPS && console.log("MathPipeline after creation", getProps(MathPipeline))
 
 
 
 // create a custom Pipeline extening MathPipeline, no more plugins first
-const CustomMathPipeline = createPipeline( [], MathPipeline);
+const CustomMathPipeline = createPipeline([], MathPipeline);
 // add a Plugin manually
 function addValue(value, amount) {
 	return value + amount;
 }
 CustomMathPipeline.addPlugin(addValue); // Dynamically add custom methods
-LOGPROPS&&console.log("MathPipeline after extension", getProps(MathPipeline))
+LOGPROPS && console.log("MathPipeline after extension", getProps(MathPipeline))
 // create an instance
 const customPipeline = new CustomMathPipeline(10);
 customPipeline.sum(10).multiply(2).addValue(2).addValue(100).end();
-LOGPROPS&&console.log("Final result customPipeline:", customPipeline.value);// 142
+LOGPROPS && console.log("Final result customPipeline:", customPipeline.value);// 142
 
-LOGPROPS&&console.log("MathPipeline after using instance of extension", getProps(MathPipeline))
+LOGPROPS && console.log("MathPipeline after using instance of extension", getProps(MathPipeline))
 
 // TESTING MORE PIPELINES - manually extening
 class ObjectPipeline extends Pipeline {
@@ -290,7 +290,7 @@ function dec(value, n = 0) {
 
 // Create a custom pipeline with additional plugins - this extends MathPipeline as 2ns arg efault
 const extendedMathPipeline = createPipeline([ dec ], MathPipeline);
-LOGPROPS&&console.log(getProps(MathPipeline))
+LOGPROPS && console.log(getProps(MathPipeline))
 // instance
 const pipeline = new extendedMathPipeline(10);
 // run the pipe using end()
@@ -325,10 +325,10 @@ function asyncMultiply(value, factor) {
 		}, 5000);
 	});
 }
- // TODO Instantiating a second MathPipeline (or ANY???) does NOT work - WHY?????
+// TODO Instantiating a second MathPipeline (or ANY???) does NOT work - WHY?????
 // seems circular on _handler - check and fix that!
 // OOOOOOOOH.... as returning value at end?? - new Proxy oesn't fix it either
- // Using the pipeline with async functions
+// Using the pipeline with async functions
 // const asyncPipeline = new MathPipeline(1000000000);
 // LOGPROPS && console.log(getProps(asyncPipeline))
 //
@@ -371,7 +371,7 @@ steps
 // Use `next` to process each operation one by one and log intermediate results
 console.log("Starting next operations...");
 console.log("1. result reading value:", steps.next().value); // 15
-console.log("2. result reading value:",steps.next().value); // 30
+console.log("2. result reading value:", steps.next().value); // 30
 console.log(
 	"3. result reading value:",
 	steps.next().value

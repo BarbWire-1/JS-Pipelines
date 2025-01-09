@@ -18,32 +18,32 @@ function devlog(value) {
 		console.warn(stack.trim());
 	}
 }
-if(DEVMODE)
-window.onerror = function (message, source, line, colno, error) {
-	console.log(
-		"An error occurred:",
-		message,
-		"at line:",
-		line,
-		"in file:",
-		source,
-		"stack: \n",
-		error.stack.split('\n').splice(2).join('\n').trim()
-	);
-	// Prevent default handling of the error
-	return true;
-};
+if (DEVMODE)
+	window.onerror = function (message, source, line, colno, error) {
+		console.log(
+			"An error occurred:",
+			message,
+			"at line:",
+			line,
+			"in file:",
+			source,
+			"stack: \n",
+			error.stack.split('\n').splice(2).join('\n').trim()
+		);
+		// Prevent default handling of the error
+		return true;
+	};
 
 
 // check the props in pipelines
 function getProps(obj) {
-	if(!globalThis.LOGPROPS) return;
+	if (!globalThis.LOGPROPS) return;
 	const ownProps = Object.getOwnPropertyNames(obj);
 	console.log({ ownProps });
 	const prototypeProps = Object.getOwnPropertyNames(
 		Object.getPrototypeOf(obj)
 	);
-	console.log(obj.constructor,{ prototypeProps });
+	console.log(obj.constructor, { prototypeProps });
 	// merge own and inherited props
 	return [ ...new Set([ ...ownProps, ...prototypeProps ]) ];
 }

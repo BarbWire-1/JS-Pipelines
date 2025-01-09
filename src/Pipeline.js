@@ -61,7 +61,7 @@ class Pipeline {
 // TODO - check where that happens!!!!
 // Factory function for creating custom pipeline classes with plugins
 function createPipeline(plugins = [], BasePipeline = Pipeline) {
-	globalThis.DEBUG &&console.log(plugins)
+	globalThis.DEBUG && console.log(plugins)
 	return class extends BasePipeline {
 		constructor (value) {
 			super(value);
@@ -75,5 +75,5 @@ function createPipeline(plugins = [], BasePipeline = Pipeline) {
 		}
 	};
 }
-//An error occurred: Uncaught TypeError: plugins?.forEach is not a function at line: 63 in file: http://127.0.0.1:5500/Pipeline.js
+
 export { Pipeline, createPipeline }
