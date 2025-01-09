@@ -16,7 +16,7 @@ export class CorePipeline {
 
 	// Add method/operation to the pipeline - queue
 	add(method, ...args) {
-		this._checkConsumed("add");
+		//this._checkConsumed("add");
 
 		// TOOO - keep this or better expose sync an async methods instead of delegating internally (???)
 		// Mark pipeline as async if any method returns a promise

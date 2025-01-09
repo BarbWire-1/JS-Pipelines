@@ -37,12 +37,13 @@ window.onerror = function (message, source, line, colno, error) {
 
 // check the props in pipelines
 function getProps(obj) {
+	if(!globalThis.LOGPROPS) return;
 	const ownProps = Object.getOwnPropertyNames(obj);
 	console.log({ ownProps });
 	const prototypeProps = Object.getOwnPropertyNames(
 		Object.getPrototypeOf(obj)
 	);
-	console.log({ prototypeProps });
+	console.log(obj.constructor,{ prototypeProps });
 	// merge own and inherited props
 	return [ ...new Set([ ...ownProps, ...prototypeProps ]) ];
 }

@@ -60,11 +60,11 @@ class Pipeline {
 
 // Factory function for creating custom pipeline classes with plugins
 function createPipeline(plugins = [], BasePipeline = Pipeline) {
-	console.log(plugins)
+	globalThis.DEBUG &&console.log(plugins)
 	return class extends BasePipeline {
 		constructor (value) {
 			super(value);
-		
+
 			if (plugins.length > 0)
 				// Dynamically add plugins to the pipeline class
 				plugins?.forEach((plugin) => {

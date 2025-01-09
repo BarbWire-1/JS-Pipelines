@@ -1,4 +1,4 @@
-
+//TODO if exteninig pipeline o not add methoss on proto!!!!!!!
 
 /* MIT License
 * Copyright(c) 2025 Barbara Kälin
@@ -6,8 +6,8 @@
 import { createPipeline, Pipeline } from "./src/Pipeline.js";
 import { getProps } from "./devUtils/debug.js";
 
-
-window.DEVMODE = true;
+globalThis.LOGPROPS = false;
+globalThis.DEVMODE = true;
 if(DEVMODE)
 window.onerror = function (message, source, line, stack, error) {
 	console.log(
@@ -83,7 +83,7 @@ function addValue2(value, amount) {
 	return value + amount;
 }
 MathPipeline.addPlugin(addValue2);
-
+LOGPROPS &&console.log("MathPipeline after creation", getProps(MathPipeline))
 
 
 
@@ -94,11 +94,13 @@ function addValue(value, amount) {
 	return value + amount;
 }
 CustomMathPipeline.addPlugin(addValue); // Dynamically add custom methods
-
+LOGPROPS&&console.log("MathPipeline after extension", getProps(MathPipeline))
 // create an instance
 const customPipeline = new CustomMathPipeline(10);
 customPipeline.sum(10).multiply(2).addValue(2).addValue(100).end();
-console.log("Final result customPipeline:", customPipeline.value);// 142
+LOGPROPS&&console.log("Final result customPipeline:", customPipeline.value);// 142
+
+LOGPROPS&&console.log("MathPipeline after using instance of extension", getProps(MathPipeline))
 
 // TESTING MORE PIPELINES - manually extening
 class ObjectPipeline extends Pipeline {
@@ -288,7 +290,7 @@ function dec(value, n = 0) {
 
 // Create a custom pipeline with additional plugins - this extends MathPipeline as 2ns arg efault
 const extendedMathPipeline = createPipeline([ dec ], MathPipeline);
-
+LOGPROPS&&console.log(getProps(MathPipeline))
 // instance
 const pipeline = new extendedMathPipeline(10);
 // run the pipe using end()
@@ -328,7 +330,7 @@ function asyncMultiply(value, factor) {
 // OOOOOOOOH.... as returning value at end?? - new Proxy oesn't fix it either
  // Using the pipeline with async functions
 // const asyncPipeline = new MathPipeline(1000000000);
-// console.log(getProps(asyncPipeline))
+// LOGPROPS && console.log(getProps(asyncPipeline))
 //
 // asyncPipeline
 // 	.add(asyncAdd, 50) // asyncAdd: 1000000000 + 50
