@@ -11,7 +11,7 @@ export class CorePipeline {
 		this._isAsync = false;
 		this._isConsumed = false;
 		this._currentIndex = 0;
-		this.results;// actually never neee now... would it be of interest?
+		this.results;// actually never used now... would it be of interest?
 	}
 
 
@@ -38,6 +38,8 @@ export class CorePipeline {
 
 	async #executeAsync() {
 		const { method, args } = this._queue.shift();
+		// TODO better store ync/async in queue as prop to not have to preproces anywhere!!!!
+		// oul also allo ync before async being execute sync an chaining all other in PromiseAll for end an loop (??)
 		let result = method(this._value, ...args);
 
 		if (!(result instanceof Promise)) {
@@ -155,7 +157,7 @@ export class CorePipeline {
 	}
 	// ugly helper to mark as async if any
 	#detectAsync(method) {
-		// Check if the function is explicitly marked as async
+		// async
 		const isExplicitAsync = method.constructor.name === "AsyncFunction";
 
 		if (isExplicitAsync) {
@@ -172,8 +174,6 @@ export class CorePipeline {
 		}
 	}
 
-
-	// Helper to get the current value
 	get value() {
 		return this._value;
 	}
