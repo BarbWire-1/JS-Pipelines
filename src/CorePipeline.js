@@ -38,7 +38,7 @@ export class CorePipeline {
 
 	async #executeAsync() {
 		const { method, args } = this._queue.shift();
-		// TODO better store ync/async in queue as prop to not have to preproces anywhere!!!!
+		// TODO better store sync/async in queue as prop to not have to preprocess anywhere!!!!
 		// oul also allo ync before async being execute sync an chaining all other in PromiseAll for end an loop (??)
 		let result = method(this._value, ...args);
 
