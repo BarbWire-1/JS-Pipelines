@@ -1,4 +1,4 @@
-//TODO if exteninig pipeline o not add methoss on proto!!!!!!!
+//TODO if extendinig pipeline do not add methods on proto!!!!!!! - messing up inheritance with plugins
 
 /* MIT License
 * Copyright(c) 2025 Barbara Kälin
