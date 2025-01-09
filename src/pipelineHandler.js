@@ -1,3 +1,6 @@
+/* MIT License
+* Copyright(c) 2025 Barbara Kälin
+*/
 import isModifyingMethod from './utils/modifyingMethods.js';
 
 export const pipelineHandler = {

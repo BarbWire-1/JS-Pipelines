@@ -1,10 +1,11 @@
-//TODO - add native-method check for mutating and fix proxy!!!!!!!!!!!!!!!!!!!!!!!!! - DONE
-//TODO - check end/endRun make one do NOT clean anything!
 
 
+/* MIT License
+* Copyright(c) 2025 Barbara Kälin
+*/
 import { createPipeline, Pipeline } from "./src/Pipeline.js";
-import { getProps } from "./devUtils/debug.js";
-// TODO - check how to pass functions with arguments????
+
+
 
 window.DEVMODE = true;
 if(DEVMODE)

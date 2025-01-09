@@ -1,4 +1,7 @@
-// TOO add in debug again to check intermediate - execute in end() only!
+/* MIT License
+* Copyright(c) 2025 Barbara Kälin
+*/
+// TODO add in debug again to check intermediate - execute in end() only!
 
 export class CorePipeline {
 	constructor (value) {

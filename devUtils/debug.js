@@ -1,3 +1,6 @@
+/* MIT License
+* Copyright(c) 2025 Barbara Kälin
+*/
 // TODO - integrate globally
 let DEVMODE = false;
 

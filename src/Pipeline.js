@@ -1,3 +1,6 @@
+/* MIT License
+* Copyright(c) 2025 Barbara Kälin
+*/
 import { CorePipeline } from './CorePipeline.js';
 import { pipelineHandler } from './pipelineHandler.js';
 
