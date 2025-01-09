@@ -1,11 +1,14 @@
+// TOO add in debug again to check intermediate - execute in end() only!
+
 export class CorePipeline {
 	constructor (value) {
-		this._value = value; // Initial value of the pipeline
-		this._queue = []; // Queue to hold pipeline operations
-		this._isAsync = false; // Tracks whether any operation is asynchronous
-		this._isConsumed = false; // Ensures pipeline can't be reused after execution
-		this._currentIndex = 0; // Tracks the current operation in the queue
-		this.results;
+
+		this._value = value;
+		this._queue = [];
+		this._isAsync = false;
+		this._isConsumed = false;
+		this._currentIndex = 0;
+		this.results;// actually never neee now... would it be of interest?
 	}
 
 	// Add method/operation to the pipeline - queue
@@ -154,3 +157,4 @@ export class CorePipeline {
 		return this._value;
 	}
 }
+Object.freeze(CorePipeline)

@@ -1,6 +1,8 @@
 import { CorePipeline } from './CorePipeline.js';
 import { pipelineHandler } from './pipelineHandler.js';
 
+
+
 class Pipeline {
 	constructor (value) {
 		if (new.target === Pipeline) {
@@ -59,13 +61,13 @@ function createPipeline(plugins = [], BasePipeline = Pipeline) {
 	return class extends BasePipeline {
 		constructor (value) {
 			super(value);
-			if(plugins.length > 0)
-			// Dynamically add plugins to the pipeline class
-			plugins?.forEach((plugin) => {
-				this[ plugin.name ] = (...args) => this.add(plugin, ...args);
-			});
+			if (plugins.length > 0)
+				// Dynamically add plugins to the pipeline class
+				plugins?.forEach((plugin) => {
+					this[ plugin.name ] = (...args) => this.add(plugin, ...args);
+				});
 		}
 	};
 }
 //An error occurred: Uncaught TypeError: plugins?.forEach is not a function at line: 63 in file: http://127.0.0.1:5500/Pipeline.js
-export {Pipeline, createPipeline}
+export { Pipeline, createPipeline }

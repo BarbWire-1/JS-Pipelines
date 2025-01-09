@@ -1,4 +1,4 @@
-import isModifyingMethod from './modifyingMethods.js';
+import isModifyingMethod from './utils/modifyingMethods.js';
 
 export const pipelineHandler = {
 	get: (target, prop) => {

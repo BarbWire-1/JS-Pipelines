@@ -1,42 +1,34 @@
 //TODO - add native-method check for mutating and fix proxy!!!!!!!!!!!!!!!!!!!!!!!!! - DONE
 //TODO - check end/endRun make one do NOT clean anything!
 
-import { createPipeline, Pipeline } from "./Pipeline.js";
 
+import { createPipeline, Pipeline } from "./src/Pipeline.js";
+import { getProps } from "./devUtils/debug.js";
 // TODO - check how to pass functions with arguments????
 
-// Global DEBUG flag to control logging behavior
-let DEBUG = true; // Set this flag to true or false to control logging
-
-// Function to capture console.log outputs and include the caller line
-function debug(value) {
-	if (DEBUG) {
-		// Get the current stack trace
-		const stack = new Error().stack;
-
-		// Extract the caller's line from the stack
-		const callerLine = stack.split("\n")[ 2 ]; // [2] because the first line is the error itself
-
-		// Log the value and the caller line (function and line number)
-		console.warn("[DEBUG] Value:", value);
-		console.warn(callerLine.trim());
-	}
-}
-window.onerror = function (message, source, lineno, colno, error) {
+window.DEVMODE = true;
+if(DEVMODE)
+window.onerror = function (message, source, line, stack, error) {
 	console.log(
-		"An error occurred:",
+		"An error occurred:\n",
 		message,
 		"at line:",
-		lineno,
-		"in file:",
-		source
+		line,
+		"in file:\n",
+		source.trim(),
+		'\n',
+		"ERROR STACK: \n",
+		error.stack.split('\n').splice(1).map(s => s.trim()).join('\n')
 	);
 	// Prevent default handling of the error
 	return true;
 };
+
+// create an extening class on Pipeline manually ith on methods on value
 class MathPipeline extends Pipeline {
 	constructor (value) {
 		super(value);
+
 	}
 
 	sum(amount = 0) {
@@ -79,23 +71,35 @@ class MathPipeline extends Pipeline {
 		return this.add((value) => Math.ceil(value));
 	}
 }
+
+// create an instance with value
+const myMathPipeline = new MathPipeline(10);
+// run with end - final value
+console.log(myMathPipeline.log().end())
+
+// manually a another method to MathPipeline
 function addValue2(value, amount) {
 	return value + amount;
 }
-const myMathPipeline = new MathPipeline(10);
 MathPipeline.addPlugin(addValue2);
+
+
+
+
+// create a custom Pipeline extening MathPipeline, no more plugins first
+const CustomMathPipeline = createPipeline( [], MathPipeline);
+// add a Plugin manually
 function addValue(value, amount) {
 	return value + amount;
 }
-const CustomMathPipeline = createPipeline([],MathPipeline);
 CustomMathPipeline.addPlugin(addValue); // Dynamically add custom methods
 
-// Example usage
+// create an instance
 const customPipeline = new CustomMathPipeline(10);
-customPipeline.sum(10).multiply(2).addValue(2).end();
-console.log("Final result:", customPipeline.value);
+customPipeline.sum(10).multiply(2).addValue(2).addValue(100).end();
+console.log("Final result customPipeline:", customPipeline.value);// 142
 
-// TESTING MORE PIPELINES
+// TESTING MORE PIPELINES - manually extening
 class ObjectPipeline extends Pipeline {
 	constructor (value) {
 		super(value);
@@ -181,10 +185,10 @@ objectPipeline
 	.end();
 
 console.log("ObjectPipeline result:", objectPipeline.value);
-// Expected result: { name: "John", city: "New York", isActive: true }
+// { name: "John", city: "New York", isActive: true }
 
 // TESTING ObjectPipeline with Multiple Persons (Array of Objects)
-const objectPipeline2 = new ObjectPipeline([
+const pickedPipeline = new ObjectPipeline([
 	{ name: "John", age: 28, city: "New York" },
 	{ name: "Jane", age: 35, city: "London" },
 	{ name: "Michael", age: 40, city: "Berlin" },
@@ -193,12 +197,26 @@ const objectPipeline2 = new ObjectPipeline([
 ]);
 
 // Apply pickBy filter: names starting with "J" and age > 30
-objectPipeline2
-	.pickBy((person) => person.name.startsWith("J") && person.age > 30) // Condition to filter
-	.setProperty("ThisJIsOldEnough", true) // Add a new property to each person object
+pickedPipeline
+	.pickBy((person) => person.name.startsWith("J") && person.age > 30)
+	.setProperty("ThisJIsOldEnough", true) // new property to each person object in picked
 	.end();
 
-console.log("Filtered ObjectPipeline result:", objectPipeline2.value);
+console.log("PickedPipeline result:", pickedPipeline.value);
+// [
+// 	{
+// 		"name": "Jane",
+// 		"age": 35,
+// 		"city": "London",
+// 		"ThisJIsOldEnough": true
+// 	},
+// 	{
+// 		"name": "Jack",
+// 		"age": 32,
+// 		"city": "San Francisco",
+// 		"ThisJIsOldEnough": true
+// 	}
+//]
 
 class StringPipeline extends Pipeline {
 	constructor (value) {
@@ -247,66 +265,46 @@ class StringPipeline extends Pipeline {
 // TESTING StringPipeline
 const stringPipeline = new StringPipeline(" hello world ");
 stringPipeline
-	.replaceAll("world", "everyone") // Replace "world" with "everyone"
-	.toCamelCase() // Convert to camelCase
-	.capitalize() // Capitalize the first letter of each word
-	.reverse() // Reverse the string
-	.end(); // Execute and get the result
-
-console.log("StringPipeline result:", stringPipeline.value);
-// Expected result: "EnoyreveHellow"
-
-
-
-// Example Plugins
-function sum(value, amount = 0) {
-	return value + amount;
-}
-
-function multiply(value, factor = 1) {
-	return value * factor;
-}
-
-function subtract(value, amount = 0) {
-	return value - amount;
-}
-
-
-
-// Create a custom pipeline with plugins
-const extendedMathPipeline = createPipeline([ sum, multiply, subtract ]);
-
-// Using the custom pipeline
-const pipeline = new extendedMathPipeline(10);
-
-// Example usage
-const result = pipeline
-	.sum(5) // 10 + 5
-	.multiply(2) // 15 * 2
-	.subtract(3) // 30 - 3
-	.end(); // Executes the pipeline
-
-console.log("Pipeline result:", result); // Output: 27
-
-// Create a CustomMathPipeline with the desired plugins
-const CustomMathPipeline2 = createPipeline([ sum, multiply, subtract ]);
-
-// TESTING CustomMathPipeline
-
-const customMathPipeline2 = new CustomMathPipeline2(10);
-
-const result2 = customMathPipeline2
-	.sum(10) // 10 + 10 = 20
-	.multiply(2) // 20 * 2 = 40
-	.subtract(5) // 40 - 5 = 35
-	.add((n) => n * 10) // 350
+	.replaceAll("world", "everyone")
+	.toCamelCase()
+	.capitalize()
+	.reverse()
 	.end();
 
-console.log("Final result:", result2); // Expected: 350
+console.log("StringPipeline result:", stringPipeline.value);// "enoyrevEolleH"
 
-// Async operations
+
+
+
+// Example Plugins to use on creating a class extening another Pipeline
+function dec(value, n = 0) {
+	return value.toFixed(n);
+}
+
+
+
+
+
+// Create a custom pipeline with additional plugins - this extends MathPipeline as 2ns arg efault
+const extendedMathPipeline = createPipeline([ dec ], MathPipeline);
+
+// instance
+const pipeline = new extendedMathPipeline(10);
+// run the pipe using end()
+const result = pipeline
+	.sum(5)
+	.multiply(2)
+	.subtract(3)
+	.divide(.66)
+	.dec(2)
+	.end();
+
+console.log("Pipeline result:", result); // 40.91
+
+
+// some async stuff testing
 function asyncAdd(value, amount) {
-	console.log(`Adding ${amount} to ${value}`); // Debug log
+	console.log(`Adding ${amount} to ${value}`);
 	return new Promise((resolve) => {
 		setTimeout(() => {
 			console.log(`Aync Adding finished`);
@@ -316,37 +314,40 @@ function asyncAdd(value, amount) {
 }
 
 function asyncMultiply(value, factor) {
-	console.log(`Multiplying ${value} by ${factor}`); // Debug log
+	console.log(`Multiplying ${value} by ${factor}`);
 	return new Promise((resolve) => {
 		setTimeout(() => {
-			console.log(`Async Multiplication finished`); // Debug log
+			console.log(`Async Multiplication finished`);
 			resolve(value * factor);
 		}, 5000);
 	});
 }
+ // TODO Instantiating a second MathPipeline (or ANY???) does NOT work - WHY?????
+// seems circular on _handler - check and fix that!
+ // Using the pipeline with async functions
+// const asyncPipeline = new MathPipeline(1000000000);
+// console.log(getProps(asyncPipeline))
+//
+// asyncPipeline
+// 	.add(asyncAdd, 50) // asyncAdd: 1000000000 + 50
+// 	.add(asyncMultiply, 2) // asyncMultiply: 1000000050 * 2
+//
+//
+// // Use .then() to log the resolved value
+// //asyncPipeline.end().then((result) => {
+// //     console.log("Async result:", result); // Output: 2000000100
+// //});
 
-// Using the pipeline with async functions
-const asyncPipeline = new CustomMathPipeline2(1000000000);
+// // Or use await in an async function
+// (async () => {
+// 	const asyncResult = await asyncPipeline.end(); // SHOULD THROW!!!
+// 	console.log("Async result (await):", asyncResult); // Output: 2000000100
+// })();
 
-asyncPipeline
-	.add(asyncAdd, 50) // asyncAdd: 1000000000 + 50
-	.add(asyncMultiply, 2); // asyncMultiply: 1000000050 * 2
+// BasePipe - only chaining add(method) - ending with loop
+const basePipe = createPipeline();
 
-// Use .then() to log the resolved value
-//asyncPipeline.end().then((result) => {
-//     console.log("Async result:", result); // Output: 2000000100
-//});
-
-// Or use await in an async function
-(async () => {
-     const asyncResult = await asyncPipeline.end(); // SHOULD THROW!!!
-   console.log("Async result (await):", asyncResult); // Output: 2000000100
-})();
-
-// Example Usage:
-const simplePipe = createPipeline();
-
-const pipelineTest = new simplePipe(10);
+const pipelineTest = new basePipe(10);
 pipelineTest
 	.add((val) => val + 5) // Adding 5
 	.add((val) => val * 2) // Multiplying by 2
@@ -355,28 +356,28 @@ pipelineTest
 	); // Loop with logging
 //.end(); // End processing and return the final result
 
-const pipelineTestAsync = new simplePipe(10);
+const steps = new basePipe(10);
 
 // Add operations to the pipeline
-pipelineTestAsync
+steps
 	.add((val) => val + 5)
 	.add((val) => val * 2)
 	.add((val) => val - 3);
 
 // Use `next` to process each operation one by one and log intermediate results
 console.log("Starting next operations...");
-console.log("Next result reading value:", pipelineTestAsync.next().value); // 15
-console.log("Next result reading value:", pipelineTestAsync.next().value); // 30
+console.log("1. result reading value:", steps.next().value); // 15
+console.log("2. result reading value:",steps.next().value); // 30
 console.log(
-	"Next result result reading value:",
-	pipelineTestAsync.next().value
+	"3. result reading value:",
+	steps.next().value
 ); // 27
 
 // Final result after all operations
-console.log("Final result:", pipelineTestAsync.value);
+console.log("Final result in 'steps':", steps.value);
 
 // Create a new pipeline
-const pipelineTest3 = new simplePipe(10000);
+const pipelineTest3 = new basePipe(10000);
 
 // Add asynchronous operations to the pipeline
 pipelineTest3
@@ -415,317 +416,3 @@ async function processNextOperations() {
 
 // Execute the async operations
 processNextOperations();
-
-
-// const CustomMethods = {
-// 	double(value) {
-// 		return value.map((x) => x * 2);
-// 	},
-//
-// 	increment(value) {
-// 		return value.map((x) => x + 1);
-// 	},
-//
-// 	reverse(value) {
-// 		return value.split("").reverse().join("");
-// 	},
-//
-// 	async fakeNetRequest(value, delay = 1000) {
-// 		console.log("Starting fake network request...");
-// 		await new Promise((resolve) => setTimeout(resolve, delay));
-// 		console.log("Fake network request complete.");
-// 		return value.map((x) => x * 10);
-// 	}
-// };
-//
-// class Pipeline {
-// 	_value;
-// 	_isAsync;
-// 	_currentPromise;
-// 	_someAsync;
-// 	#currentType;
-//
-// 	constructor (value) {
-// 		this._value = value;
-// 		this._currentPromise = Promise.resolve();
-// 		this._isAsync = false;
-// 		this._someAsync = false;
-// 		this.#currentType = Array.isArray(value) ? 'array' : typeof value
-//
-// 		return new Proxy(this, {
-// 			get: (target, prop) => {
-//
-// 				// Handle custom and native methods on _value (like array methods)
-// 				if (typeof target._value[ prop ] === "function") {
-// 					console.log(target._value[ prop ])
-// 					return (...args) => {
-// 						return Pipeline._exec(target, (value) => {
-// 							try {
-// 								const result = target._value = value[ prop ](...args);
-// 								target.#currentType = Array.isArray(result) ? 'array' : typeof result;
-// 								console.log("TYPE:", result, this.#currentType)
-// 								// If the method is mutating (e.g., push), return the updated value
-// 								if (Pipeline.isMutating(value[ prop ])) {
-// 									target.#currentType = Array.isArray(value) ? 'array' : typeof value
-// 									console.log("TYPE:", this.#currentType)
-// 									target._value = value;
-// 									return value;
-// 								}
-// 								return result;
-// 							} catch (error) {
-// 								console.error(
-// 									`Error executing method ${prop}: ${error.message}`
-// 								);
-// 								console.error(error.stack);
-// 								throw error;
-// 							}
-// 						});
-// 					};
-// 				}
-//
-// 				if (prop === '_value')
-// 					target.#currentType = Array.isArray(target._value) ? 'array' : typeof target._value
-// 				console.log("TYPE:", this.#currentType)
-//
-// 				return target[ prop ]; // For non-function properties (e.g., length)
-// 			}
-// 		});
-// 	}
-//
-// 	// Static helper to determine if the method is mutating (e.g., push, pop)
-// 	static isMutating(method) {
-// 		const mutatingMethods = [
-// 			"push",
-// 			"pop",
-// 			"shift",
-// 			"unshift",
-// 			"sort",
-// 			"reverse",
-// 			"splice",
-// 			"fill",
-// 			"copyWithin",
-//
-//
-//
-// 		];
-// 		return mutatingMethods.includes(method.name);
-// 	}
-//
-// 	// Execute sync or async logic based on the pipeline's _isAsync state.
-// 	// Updated _exec to handle both sync and async properly
-// 	static _exec(pipeline, fn) {
-// 		if (pipeline._someAsync) {
-// 			// Chain async operations
-// 			pipeline._currentPromise = pipeline._currentPromise.then(() => {
-// 				return fn(pipeline._value);
-// 			}).then((result) => {
-// 				if (result) pipeline._value = result; // Update value after async result
-// 			});
-// 		} else {
-// 			// Directly execute for synchronous operations
-// 			const result = fn(pipeline._value);
-// 			if (result) pipeline._value = result;
-// 		}
-// 		return pipeline;
-// 	}
-//
-// 	// Updated debug method to handle async properly
-// 	debug() {
-// 		if (this._isAsync) {
-// 			this._currentPromise = this._currentPromise.then(() => {
-// 				console.log("Current value (async):", this._value);
-// 			});
-// 		} else {
-// 			console.log("Current value (sync):", this._value);
-// 		}
-// 		return this;
-// 	}
-// 	static executeSync(method, ...args) {
-// 		return Pipeline._exec(this, (value) => method(value, ...args));
-// 	}
-//
-// 	// Updated run method for dynamic method handling
-// 	run(method, expectedType, ...args) {
-// 		const methodName = "temp";
-// 		Pipeline.addCustomMethod(methodName, method, expectedType);
-//
-// 		Pipeline._validateInput(this, methodName);
-// 		let fn =  (value) => method(value, ...args)
-// 		// TODO do not execute irectly but on end only !
-// 		// Choose between async or sync execution
-// 		const result = method.constructor.name === "AsyncFunction"
-// 			? Pipeline._async(this, fn)
-// 			: Pipeline._exec(this, fn);
-//
-// 		return result
-// 	}
-//
-//
-// 	static _async(pipeline, asyncFn) {
-// 		pipeline._isAsync = true;
-// 		pipeline._someAsync = true;
-// 		const asyncPromise = asyncFn(pipeline._value).then((result) => {
-// 			pipeline._value = result;
-// 			pipeline._isAsync = false;
-// 		});
-// 		pipeline._currentPromise = pipeline._currentPromise.then(
-// 			() => asyncPromise
-// 		);
-// 		return pipeline;
-// 	}
-//
-//
-//
-// 	// End the pipeline and return the final value.
-// 	end() {
-// 		if (this._someAsync) {
-// 			return this._currentPromise.then(() => {
-// 				this.endRun();
-// 				console.log("Finished async pipeline:", this._value);
-// 				return this._value;
-// 			});
-// 		} else {
-// 			console.log("Finished sync pipeline:", this._value);
-// 		}
-// 		return this._value;
-// 	}
-//
-// 	// Add custom methods dynamically with type validation.
-// 	static addCustomMethod(name, method, expectedType) {
-// 		if (!this.methodTypeMap) this.methodTypeMap = {};
-// 		this.methodTypeMap[ name ] = { name, type: expectedType };
-//
-// 		Pipeline.prototype[ name ] = function (...args) {
-// 			Pipeline._validateInput(this, name);
-//
-// 			if (method.constructor.name === "AsyncFunction") {
-// 				return Pipeline._async(this, (value) =>
-// 					method(value, ...args)
-// 				);
-// 			} else {
-// 				return Pipeline._exec(this, (value) =>
-// 					method(value, ...args)
-// 				);
-// 			}
-// 		};
-// 	}
-//
-// 	// Validate input type before method execution.
-// 	static _validateInput(pipeline, methodName) {
-// 		const methodMeta = Pipeline.methodTypeMap[ methodName ];
-// 		if (!methodMeta) {
-// 			throw new Error(
-// 				`Method '${methodName}' is not defined on Pipeline.`
-// 			);
-// 		}
-//
-// 	}
-//
-//
-//
-//
-//
-//
-//
-//
-// 	// Finalize the pipeline (sync/async).
-// 	endRun() {
-// 		const cleanup = () => {
-// 			this._value = null;
-// 			this._currentPromise = null;
-// 			this._isAsync = null;
-// 			this._someAsync = null;
-// 		};
-//
-// 		const finalize = (finalValue) => {
-// 			console.log("Pipeline cleaned and finished:", finalValue);
-// 			cleanup();
-// 			return finalValue;
-// 		};
-//
-// 		if (this._someAsync) {
-// 			return this._currentPromise.then(() => finalize(this._value));
-// 		}
-//
-// 		return finalize(this._value);
-// 	}
-// }
-//
-// // Factory function for creating pipelines
-// function pipe(value) {
-// 	return new Pipeline(value);
-// }
-//
-// // Dynamically add custom methods from the CustomMethods namespace
-// Pipeline.addCustomMethod("double", CustomMethods.double, "array");
-// Pipeline.addCustomMethod("increment", CustomMethods.increment, "array");
-// Pipeline.addCustomMethod("reverse", CustomMethods.reverse, "string");
-// Pipeline.addCustomMethod(
-// 	"fakeNetRequest",
-// 	CustomMethods.fakeNetRequest,
-// 	"array"
-// );
-//
-// async function simulateAsync(value, delay) {
-// 	console.log("Simulating async task...");
-// 	await new Promise((resolve) => setTimeout(resolve, delay));
-// 	console.log("Simulated async task completed");
-// 	return value.map((x) => x + 10); // Add 10 after async delay
-// }
-//
-// /// add a plugin on Prototype
-// Pipeline.addCustomMethod(
-// 	"average",
-// 	(value) => value.reduce((a, b) => a + b, 0) / value.length,
-// 	"array"
-// );
-//
-// //const average = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
-//
-// (async () => {
-// 	const asyncResultA = await new Pipeline([ 100, 200, 300 ], "Async ResultA")
-// 		.debug() // [100, 200, 300]
-// 		.push(400)
-// 		.debug() // [100, 200, 300, 400]
-// 		.run(simulateAsync, 10000) // Async operation n => n + 10
-// 		.debug() // [110, 210, 310, 410]
-// 		.average() // Synchronous operation: computes the average
-// 		.debug() // 260
-// 		.run((x) => x / 2.2) // Divides average by 2.2
-// 		.debug() // Logs: 95.45
-// 		.end(); // Returns 95.45
-//
-// 	console.log("Final Result:", asyncResultA);
-// })();
-//
-//
-// const asyncResultC = new Pipeline([ 1000, 2000, 3000 ], "Async ResultC")
-// 	.debug() // [1000, 2000, 3000]
-// 	.run(simulateAsync, 1000) //  custom async method
-// 	.debug()// [1010, 2010, 3010]
-// 	//.map(n => n -100)// works directly a init type is array
-// 	.average()// plugin-method - coercing to num
-// 	.debug() // 2010
-// 	.run((x) => x / 2.2)
-// 	.debug() // 913.6363636363635
-// 	.toString() // coercing to string
-// 	.debug()//'913.6363636363635'
-// 	.run(num => parseInt(num)) // back to num int - TOO check hy type change is not logged (???)
-// 	.end(); // Returns 913
-//
-// console.log("Final Result in C:", await asyncResultC);// 913
-//
-// //WHY can't I use map on the array??????
-// const string = new Pipeline('Hello World', "String")
-// 	.debug() // 'Hello World'
-// 	.split(' ') //  native code on init type (!!!!!1234)
-// 	.debug()// ['Hello', 'World']
-// 	.run(arr => arr.map(w => w.toUpperCase())) // needs to be wrapped into run - why??? as coerced to array??
-// 	.run(arr => arr.join(' '))
-// 	.debug()// HELLO WORLD
-// 	.reverse()
-//
-// 	.end();
-//
-// console.log("Final Result in string:", string);// DLROW OLLEH
-// */
