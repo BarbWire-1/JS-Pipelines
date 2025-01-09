@@ -57,7 +57,8 @@ class Pipeline {
 		return this.corePipeline._value;
 	}
 }
-
+// This messes up inheritance when creating multiple instances of one extene + expanded class
+// TODO - check where that happens!!!!
 // Factory function for creating custom pipeline classes with plugins
 function createPipeline(plugins = [], BasePipeline = Pipeline) {
 	globalThis.DEBUG &&console.log(plugins)
