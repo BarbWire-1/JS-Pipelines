@@ -16,13 +16,21 @@ export class CorePipeline {
 
 	// Add method/operation to the pipeline - queue
 	add(method, ...args) {
-		//this._checkConsumed("add");
+		this._checkConsumed("add");
 
-		// TOOO - keep this or better expose sync an async methods instead of delegating internally (???)
-		// Mark pipeline as async if any method returns a promise
-		if (!this._isAync) {
-			const result = method(this._value, ...args);
-			if (result instanceof Promise) {
+		// TODO hm maybe just expose asyncAdd when cleaning
+		// Mark pipeline as async if any async method
+		if (!this._isAsync) {
+			const methodString = method.toString();
+
+			// Remove both single-line and multi-line comments
+			const withoutComments = methodString.replace(/\/\/.*$|\/\*[\s\S]*?\*\//gm, '');
+			const isUsingPromise = withoutComments.includes("Promise");
+
+			// Check if the function is explicitly marked as async
+			const isExplicitAsync = method.constructor.name === "AsyncFunction";
+
+			if (isExplicitAsync || isUsingPromise) {
 				this._isAsync = true;
 			}
 		}
