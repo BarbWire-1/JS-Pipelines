@@ -64,11 +64,13 @@ function createPipeline(plugins = [], BasePipeline = Pipeline) {
 	return class extends BasePipeline {
 		constructor (value) {
 			super(value);
+		
 			if (plugins.length > 0)
 				// Dynamically add plugins to the pipeline class
 				plugins?.forEach((plugin) => {
 					this[ plugin.name ] = (...args) => this.add(plugin, ...args);
 				});
+
 		}
 	};
 }

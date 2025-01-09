@@ -4,7 +4,7 @@
 * Copyright(c) 2025 Barbara Kälin
 */
 import { createPipeline, Pipeline } from "./src/Pipeline.js";
-
+import { getProps } from "./devUtils/debug.js";
 
 
 window.DEVMODE = true;
@@ -325,6 +325,7 @@ function asyncMultiply(value, factor) {
 }
  // TODO Instantiating a second MathPipeline (or ANY???) does NOT work - WHY?????
 // seems circular on _handler - check and fix that!
+// OOOOOOOOH.... as returning value at end?? - new Proxy oesn't fix it either
  // Using the pipeline with async functions
 // const asyncPipeline = new MathPipeline(1000000000);
 // console.log(getProps(asyncPipeline))
@@ -338,7 +339,7 @@ function asyncMultiply(value, factor) {
 // //asyncPipeline.end().then((result) => {
 // //     console.log("Async result:", result); // Output: 2000000100
 // //});
-
+//
 // // Or use await in an async function
 // (async () => {
 // 	const asyncResult = await asyncPipeline.end(); // SHOULD THROW!!!
