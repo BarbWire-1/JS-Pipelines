@@ -3,6 +3,7 @@
 */
 import { CorePipeline } from './CorePipeline.js';
 import { pipelineHandler } from './pipelineHandler.js';
+import { CorePipeline } from './CorePipeline';
 
 
 
@@ -59,6 +60,7 @@ class Pipeline {
 }
 // This messes up inheritance when creating multiple instances of one extene + expanded class
 // TODO - check where that happens!!!!
+// would each derived need an own CorePipeline to not mess? - totally clueless for now
 // Factory function for creating custom pipeline classes with plugins
 function createPipeline(plugins = [], BasePipeline = Pipeline) {
 	globalThis.DEBUG && console.log(plugins)
