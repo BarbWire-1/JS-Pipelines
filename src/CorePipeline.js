@@ -161,15 +161,14 @@ export class CorePipeline {
 		if (isExplicitAsync) {
 			this._isAsync = true;
 		} else {
-			// Remove both single-line and multi-line comments
+
 			const isUsingPromise = method.toString()
 				.replace(/\/\/.*$|\/\*[\s\S]*?\*\//gm, '')// remove comments
 				.replace(/(['"`]).*?\1/g, '') // remove strings inside function
-				.includes("Promise");// check for
+				.includes("Promise");
 
-			if (isUsingPromise) {
-				this._isAsync = true;
-			}
+			if (isUsingPromise) this._isAsync = true;
+
 		}
 	}
 
