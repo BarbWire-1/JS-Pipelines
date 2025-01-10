@@ -21,7 +21,7 @@ export class CorePipeline {
 
 	// Add method/operation to the pipeline - queue
 	add(method, ...args) {
-		this.#checkConsumed("add");
+		this.#checkQueue("add");
 
 		// TODO hm maybe just expose asyncAdd when cleaning
 		// Mark pipeline as async if any async method
@@ -45,7 +45,7 @@ export class CorePipeline {
 		// oul also allo ync before async being execute sync an chaining all other in PromiseAll for end an loop (??)
 		let result = method(this._value, ...args);
 
-		if (!(result instanceof Promise)) {
+		if (!this.#detectAsync()) {
 			result = Promise.resolve(result); // Wrap non-Promise results
 		}
 
@@ -57,7 +57,7 @@ export class CorePipeline {
 
 	// Process the entire pipeline and return the final result
 	end() {
-		this.#checkConsumed("end");
+		this.#checkQueue("end");
 		this._isConsumed = true;
 
 		return !this._isAsync ? this.#syncEnd() : this.#asyncEnd();
@@ -65,7 +65,7 @@ export class CorePipeline {
 
 	//Loop an return an array of intermediate results - apply callback if provied
 	loop(callback) {
-		this.#checkConsumed("loop");
+		this.#checkQueue("loop");
 		this._isConsumed = true;
 
 		return this._isAsync
@@ -75,7 +75,7 @@ export class CorePipeline {
 
 	// Step through results, access step value as next().value
 	next(callback) {
-		this.#checkConsumed("next");
+		this.#checkQueue("next");
 		return !this._isAsync
 			? this.#syncNext(callback)
 			: this.#asyncNext(callback);
@@ -119,10 +119,8 @@ export class CorePipeline {
 
 	// NEXT
 	#syncNext(callback) {
-		this.#checkConsumed();
-
-		const { method, args } = this._queue.shift();
-		this._value = method(this._value, ...args);
+		this.#checkQueue();
+		this.#executeSync()
 		//this.results.push(this._value); // Store intermediate results
 
 		if (callback) {
@@ -132,17 +130,7 @@ export class CorePipeline {
 		return this;
 	}
 	async #asyncNext(callback) {
-		const { method, args } = this._queue.shift();
-		let result = method(this._value, ...args);
-
-		// wrap subsequent sync functions async to chain on prev Promise - for now (!!!)
-		if (!this.#detectAsync(method)) {
-			result = Promise.resolve(result);
-		}
-
-		this._value = await result;
-		//this.results.push(this._value);
-
+		this.#executeAsync();
 		if (callback) {
 			callback(this._value);
 		}
@@ -151,7 +139,7 @@ export class CorePipeline {
 	}
 
 	// Ensure the pipeline hasn't already been consumed
-	#checkConsumed(method) {
+	#checkQueue(method) {
 		if (this._isConsumed) {
 			throw new Error(
 				`Pipeline has already been consumed. Cannot execute '${method}'.`
@@ -160,7 +148,7 @@ export class CorePipeline {
 	}
 	// ugly helper to mark as async if any
 	#detectAsync(method) {
-		// async
+
 		const isExplicitAsync = method.constructor.name === "AsyncFunction";
 
 		if (isExplicitAsync) {

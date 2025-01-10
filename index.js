@@ -57,7 +57,7 @@ const test = new BasePipeline(20);
 
 // add another Plugin to the class
 // MathBasePipe.addPlugin() // throws correctly for missing methodName
-// define a ne MathPlugin
+// define a new MathPlugin
 const dec = (value, decimals) => value.toFixed(decimals);
 
 
