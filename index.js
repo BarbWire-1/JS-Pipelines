@@ -60,15 +60,15 @@ class MathPipeline extends Pipeline {
 		return this.add((value) => Math.log(value / Math.log(base)));
 	}
 
-	round(value) {
+	round() {
 		return this.add((value) => Math.round(value));
 	}
 
-	floor(value) {
+	floor() {
 		return this.add((value) => Math.floor(value));
 	}
 
-	ceil(value) {
+	ceil() {
 		return this.add((value) => Math.ceil(value));
 	}
 }
@@ -343,10 +343,10 @@ asyncPipeline
 // //});
 //
 // // Or use await in an async function
-// (async () => {
-// 	const asyncResult = await asyncPipeline.end(); // SHOULD THROW!!!
-// 	console.log("Async result (await):", asyncResult); // Output: 2000000100
-// })();
+(async () => {
+	const asyncResult = await asyncPipeline.end(); // SHOULD THROW!!!
+	console.log("Async result (await):", asyncResult); // Output: 2000000100
+})();
 
 // BasePipe - only chaining add(method) - ending with loop
 const basePipe = createPipeline();

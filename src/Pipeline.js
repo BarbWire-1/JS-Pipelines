@@ -71,7 +71,7 @@ function createPipeline(plugins = [], BasePipeline = Pipeline) {
 			//if(BasePipeline !== Pipeline)
 		globalThis.LOGPROPS &&	console.log("BasePipeline", Object.getPrototypeOf(this),this._handler, )
 
-			if (plugins.length > 0)
+			plugins.length  &&
 				// Dynamically add plugins to the pipeline class
 				plugins?.forEach((plugin) => {
 					this[ plugin.name ] = (...args) => this.add(plugin, ...args);
@@ -81,4 +81,41 @@ function createPipeline(plugins = [], BasePipeline = Pipeline) {
 	};
 }
 
-export { Pipeline, createPipeline }
+// TODO TO TEST FOR INHERITANCE -create new testCases relying on this structure
+// Function to create a base pipeline class and wrap it in a Proxy
+function createBasePipeline(BasePipeline, basePlugins = []) {
+
+	return class extends BasePipeline {
+		constructor (value) {
+			super(value); // Call the constructor of the BasePipeline class
+			// Add class-level plugins to the class prototype (not the instance)
+			basePlugins.length && basePlugins.forEach((plugin) => {
+				BasePipeline[ plugin.name ] = plugin; // Add each plugin to the class's prototype
+			});
+			return new Proxy(this, pipelineHandler); // Return the proxied instance
+		}
+
+
+
+
+}
+}
+
+// Function to extend an existing pipeline class with additional plugins (to be added to the class itself)
+function extendPipeline(BasePipeline, extendingPlugins = []) {
+	class ExtendedPipeline extends BasePipeline {
+		constructor (value) {
+			super(value); // Call the constructor of the base class
+		}
+	}
+
+	// Add class-level plugins to the class prototype (not the instance)
+	extendingPlugins.length && extendingPlugins.forEach((plugin) => {
+		ExtendedPipeline.prototype[ plugin.name ] = plugin; // Add each plugin to the class's prototype
+	});
+
+	return ExtendedPipeline;
+}
+
+
+export { Pipeline, createPipeline, createBasePipeline, extendPipeline }
