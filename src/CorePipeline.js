@@ -3,6 +3,7 @@
 */
 //  TODO add in debug again to check intermediate - execute in end() only!
 //  TODO 1.1.1 store sync/async of method in queue in add, then later switch execution methodBased, if asyncInProgres resume any further metho from being processed until resolved - coul expose resume/continue for regulation (??)
+// TOO ad a central function to executeQue to implement stop and reume
 
 
 // TODO change to static methods passing this in constructor ffor all internal?
@@ -14,6 +15,7 @@ export class CorePipeline {
 		this._isAsync = false;
 		this._isConsumed = false;
 		this._currentIndex = 0;
+		this._isPaused = false;
 		this.results;// actually never used now... would it be of interest?
 	}
 
@@ -80,6 +82,13 @@ export class CorePipeline {
 			? this.#syncNext(callback)
 			: this.#asyncNext(callback);
 	}
+	stop(callback) {
+		this._isStopped = true;
+		callback && callback(this._value)
+	}
+	resume() {
+		this._isStopped = false;
+	}
 
 	// Internal methods to handle execution - types
 
@@ -112,7 +121,7 @@ export class CorePipeline {
 	async #asyncLoop(callback) {
 		while (this._queue.length > 0) {
 			await this.#executeAsync();
-			callback(this._value);
+			callback && callback(this._value);
 		}
 		return this._value;
 	}
@@ -121,19 +130,13 @@ export class CorePipeline {
 	#syncNext(callback) {
 		this.#checkQueue();
 		this.#executeSync()
-		//this.results.push(this._value); // Store intermediate results
-
-		if (callback) {
-			callback(this._value); // Invoke callback with intermediate result
-		}
+		callback && callback(this._value);
 
 		return this;
 	}
 	async #asyncNext(callback) {
 		this.#executeAsync();
-		if (callback) {
-			callback(this._value);
-		}
+		callback && callback(this._value);
 
 		return this;
 	}
@@ -160,7 +163,7 @@ export class CorePipeline {
 				.replace(/(['"`]).*?\1/g, '') // remove strings inside function
 				.includes("Promise");
 
-			isUsingPromise ? true : false;
+			return isUsingPromise;
 
 		}
 
