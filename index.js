@@ -63,8 +63,18 @@ const dec = (value, decimals) => value.toFixed(decimals);
 
 const testPlugin = new MathBasePipe(100);
 
-DUMP && dumpObject(testPlugin)// dec not correctly added - in list ''
+DUMP && dumpObject(testPlugin)
 MathBasePipe.addPlugin(dec, 'dec');
-DUMP && dumpObject(testPlugin)// dec registered in MathBasePipe now, but not correct chaining - but WHY
+DUMP && dumpObject(testPlugin)// dec registered in MathBasePipe now
 const testPluginEnd = testPlugin.sum(900).divide(3).dec(2).end();
 console.log(testPluginEnd)
+
+
+const square = (value) => value*value
+// extend the existing MathBasePipe
+const extendedMathPipe = extendPipelineClass(MathBasePipe, [ square ]);
+const extendedMathInstance = new extendedMathPipe(33);
+DUMP && dumpObject(extendedMathInstance)
+
+const extendedMathResult = extendedMathInstance.sum(5).square().end()
+console.log(extendedMathResult)// 1444 :)))) LOOKS GOOD
