@@ -3,7 +3,7 @@
 /* MIT License
 * Copyright(c) 2025 Barbara Kälin
 */
-import { BasePipeline, extendPipelineClass } from "./src/Pipeline.js";
+import { BasePipeline, extendPipelineClass, pipe } from "./src/Pipeline.js";
 import { logUncaught, getProps, dumpObject } from "./devUtils/debug.js";
 
 globalThis.DUMP = false;
@@ -12,16 +12,15 @@ globalThis.DEVMODE = true;
 // log all uncaught errors with stack in DEVMOE
 globalThis.DEVMODE && logUncaught()
 
-// simple BasePipeline NO plugins - only chaining on add()
 
 
-const testBasePipe = new BasePipeline([ 15, 28, 2.4, 99 ])
-const testBasePipeEnd = testBasePipe
-	.add(arr => arr.map(n => n * 2))
-	.add(arr => arr.map(n => parseInt(n)))
-	.end();
+const testBasePipe =
+	new BasePipeline([ 15, 28, 2.4, 99 ])
+		.add(arr => arr.map(n => n * 2))
+		.add(arr => arr.map(n => parseInt(n)))
 
-console.log({ testBasePipeEnd })//[30, 56, 4, 198]
+
+console.log( testBasePipe.end() )//[30, 56, 4, 198]
 DUMP && dumpObject(testBasePipe)
 
 // 1. specialised BaseClass with some plugins on Pipeline
@@ -52,7 +51,7 @@ const MathBasePipe = extendPipelineClass(BasePipeline, mathPlugins)
 const testMathBasePipe = new MathBasePipe(20)
 DUMP && dumpObject(testMathBasePipe)
 const testMathBasePipeEnd = testMathBasePipe.sum(5).divide(10).end()
-console.log({ testMathBasePipeEnd })
+console.log({ testMathBasePipeEnd })// 2.5
 
 // checkInheritance
 const test = new BasePipeline(20);
@@ -76,18 +75,16 @@ const testPluginEnd =
 	.divide(3)
 	.dec(2)
 	.end();
-console.log(testPluginEnd)
+console.log(testPluginEnd)// 333.33
 
 
 const square = (value) => value * value
 // extend the existing MathBasePipe
 const extendedMathPipe = extendPipelineClass(MathBasePipe, [ square ]);
-const extendedMathInstance = new extendedMathPipe(33);
-DUMP && dumpObject(extendedMathInstance)
-
-const extendedMathResult =
-	extendedMathInstance
+const extendedMathInstance = new extendedMathPipe(33)
 		.sum(5)
 		.square()
+		.add(n => n % 2 === 0 ? n * 2 : n)
 		.end()
-console.log(extendedMathResult)// 1444 :)))) LOOKS GOOD
+console.log(extendedMathInstance)// 2888 :)))) LOOKS GOOD
+DUMP && dumpObject(extendedMathInstance)

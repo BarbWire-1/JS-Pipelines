@@ -1,17 +1,16 @@
 /* MIT License
 * Copyright(c) 2025 Barbara Kälin
 */
+
+
 import isModifyingMethod from './utils/modifyingMethods.js';
 // TODO not tested yet on modiying methods of all types
 export const pipelineHandler = {
 	get: (target, prop) => {
-		//console.log(prop)
-		// traverse prototype chain to find the property/method
-		let currentTarget = target;
-		while (currentTarget !== null) {
-			if (prop in currentTarget) {
+		//console.log(prop
+			if (prop in target) {
 
-				const propValue = currentTarget[ prop ];
+				const propValue = target[ prop ];
 
 				//  modifying method, return the chaining behavior
 				if (typeof propValue === 'function' && isModifyingMethod(prop)) {
@@ -25,10 +24,9 @@ export const pipelineHandler = {
 				// otherwise, pass the property as-is
 				return propValue;
 			}
-			currentTarget = Object.getPrototypeOf(currentTarget);
-		}
+
 
 		// TODO catch all undefined
-		//return undefined;
+		return undefined;
 	}
 };
