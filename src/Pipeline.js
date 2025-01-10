@@ -17,6 +17,7 @@ class Pipeline {
 
 		this.corePipeline = new CorePipeline(value);
 
+
 	}
 
 	// define the exposed command-methods, delegating to private corePipeline
@@ -63,26 +64,23 @@ function extendPipelineClass(BasePipeline, classPlugins = []) {
 		}
 		// Method to manually ad Plugins after instantiation
 		static addPlugin(method) {
-
 			ExtendedPipeline.prototype[ method.name ] = function (...args) {
 				return this.add(method, ...args);
-
 			};
 		}
 	}
 
-	// Add class-level plugins to the class prototype (not the instance)
+	// Add class-level plugins from args 
 	classPlugins.length && classPlugins.forEach((plugin) => {
-		ExtendedPipeline.prototype[ plugin.name ] = function (...args) {
-			return this.add(plugin, ...args);
-		};
+		ExtendedPipeline.addPlugin(plugin)
+
 	});
 
 
 	return ExtendedPipeline;
 }
 
-
+const pipe = (Class, value) => new Class(value);
 
 const BasePipeline = createPipelineClass(Pipeline)
-export { BasePipeline, createPipelineClass, extendPipelineClass }
+export { BasePipeline, createPipelineClass, extendPipelineClass, pipe }
