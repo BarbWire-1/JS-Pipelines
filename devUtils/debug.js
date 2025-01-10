@@ -1,6 +1,8 @@
 /* MIT License
 * Copyright(c) 2025 Barbara Kälin
 */
+
+
 // TODO - integrate globally
 let DEVMODE = false;
 
@@ -18,7 +20,8 @@ function devlog(value) {
 		console.warn(stack.trim());
 	}
 }
-if (DEVMODE)
+
+function logUncaught() {
 	window.onerror = function (message, source, line, colno, error) {
 		console.log(
 			"An error occurred:",
@@ -33,6 +36,7 @@ if (DEVMODE)
 		// Prevent default handling of the error
 		return true;
 	};
+}
 
 
 // check the props in pipelines
@@ -84,4 +88,4 @@ function dumpClassAndInstance(instance) {
 }
 
 
-export { DEVMODE, devlog, getProps, dumpClassAndInstance }
+export { logUncaught, devlog, getProps, dumpClassAndInstance }

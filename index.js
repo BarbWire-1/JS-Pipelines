@@ -4,26 +4,14 @@
 * Copyright(c) 2025 Barbara Kälin
 */
 import { createPipeline, Pipeline} from "./src/Pipeline.js";
-import { getProps,dumpClassAndInstance } from "./devUtils/debug.js";
+import { logUncaught, getProps,dumpClassAndInstance } from "./devUtils/debug.js";
 
 globalThis.LOGPROPS = false;
 globalThis.DEVMODE = true;
-if (DEVMODE)
-	window.onerror = function (message, source, line, stack, error) {
-		console.log(
-			"An error occurred:\n",
-			message,
-			"at line:",
-			line,
-			"in file:\n",
-			source.trim(),
-			'\n',
-			"ERROR STACK: \n",
-			error.stack.split('\n').splice(1).map(s => s.trim()).join('\n')
-		);
-		// Prevent default handling of the error
-		return true;
-	};
+
+// log all uncaught errors with stack in DEVMOE
+globalThis.DEVMODE && logUncaught()
+
 
 // create an extening class on Pipeline manually ith on methods on value
 class MathPipeline extends Pipeline {
@@ -343,12 +331,12 @@ asyncPipeline
 // //});
 //
 // // Or use await in an async function
-(async () => {
-	const asyncResult = await asyncPipeline.end(); // SHOULD THROW!!!
-	console.log("Async result (await):", asyncResult); // Output: 2000000100
-})();
+// (async () => {
+// 	const asyncResult = await asyncPipeline.end(); // SHOULD THROW!!!
+// 	console.log("Async result (await):", asyncResult); // Output: 2000000100
+// })();
 
-// BasePipe - only chaining add(method) - ending with loop
+// BasePipe - only chaining via add(method) - ending with loop
 const basePipe = createPipeline();
 
 const pipelineTest = new basePipe(10);

@@ -88,7 +88,7 @@ function createBasePipeline(BasePipeline, basePlugins = []) {
 	return class extends BasePipeline {
 		constructor (value) {
 			super(value); // Call the constructor of the BasePipeline class
-			// Add class-level plugins to the class prototype (not the instance)
+			// Add class-level plugins to the BaseClass inherted by all decendants (so the theory)
 			basePlugins.length && basePlugins.forEach((plugin) => {
 				BasePipeline[ plugin.name ] = plugin; // Add each plugin to the class's prototype
 			});
