@@ -3,7 +3,7 @@
 /* MIT License
 * Copyright(c) 2025 Barbara Kälin
 */
-import { Pipeline, createBasePipeline, extendPipeline } from "./src/Pipeline.js";
+import { BasePipeline, createBasePipeline, extendPipeline } from "./src/Pipeline.js";
 import { logUncaught, getProps, dumpObject } from "./devUtils/debug.js";
 
 globalThis.LOGPROPS = false;
@@ -13,7 +13,7 @@ globalThis.DEVMODE = true;
 globalThis.DEVMODE && logUncaught()
 
 // simple BasePipeline NO plugins - only chaining on add()
-const BasePipeline = createBasePipeline(Pipeline);
+
 
 const testBasePipe = new BasePipeline([15, 28, 2.4,99])
 const testBasePipeEnd = testBasePipe.add(arr => arr.map(n => n * 2)).add(arr => arr.map(n => parseInt(n))).end();
@@ -59,10 +59,11 @@ const test = new BasePipeline(20);
 // MathBasePipe.addPlugin() // throws correctly for missing methodName
 // define a ne MathPlugin
 const dec = (value, decimals = 2) => value.toFixed(decimals);
-MathBasePipe.addPlugin(dec, 'dec');
+
 
 const testPlugin = new MathBasePipe(100);
 
 LOGPROPS && dumpObject(testPlugin)// dec not correctly added - in list ''
-
-const testPluginEnd = testPlugin.sum(900).dec()// - not a function :(
+MathBasePipe.addPlugin(dec, 'dec');
+LOGPROPS && dumpObject(testPlugin)// all MathPipeline props gone :(((((
+//const testPluginEnd = testPlugin.sum(900).dec()// - not a function :(

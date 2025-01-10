@@ -121,5 +121,7 @@ function extendPipeline(BasePipeline, classPlugins = []) {
 	return ExtendedPipeline;
 }
 
+// return BasePipeline only??
 
-export { Pipeline, createPipeline, createBasePipeline, extendPipeline }
+const BasePipeline = createBasePipeline(Pipeline)
+export { BasePipeline,  createBasePipeline, extendPipeline }
