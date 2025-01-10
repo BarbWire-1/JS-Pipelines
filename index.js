@@ -3,7 +3,7 @@
 /* MIT License
 * Copyright(c) 2025 Barbara Kälin
 */
-import { BasePipeline, createPipelineClass, extendPipelineClass } from "./src/Pipeline.js";
+import { BasePipeline, extendPipelineClass } from "./src/Pipeline.js";
 import { logUncaught, getProps, dumpObject } from "./devUtils/debug.js";
 
 globalThis.DUMP = false;
@@ -16,7 +16,11 @@ globalThis.DEVMODE && logUncaught()
 
 
 const testBasePipe = new BasePipeline([ 15, 28, 2.4, 99 ])
-const testBasePipeEnd = testBasePipe.add(arr => arr.map(n => n * 2)).add(arr => arr.map(n => parseInt(n))).end();
+const testBasePipeEnd = testBasePipe
+	.add(arr => arr.map(n => n * 2))
+	.add(arr => arr.map(n => parseInt(n)))
+	.end();
+
 console.log({ testBasePipeEnd })//[30, 56, 4, 198]
 DUMP && dumpObject(testBasePipe)
 
@@ -30,9 +34,9 @@ const multiply = (value, factor = 1) => value * factor;
 
 function divide(value, divisor = 1) {
 	if (divisor === 0) {
-		throw new Error('Division by zero is not possible.')
+		throw new Error('Division by zero is not implemented yet. ;)')
 	}
-	return  value / divisor;
+	return value / divisor;
 }
 const root = (value, nthRoot = 2) => Math.pow(value, 1 / nthRoot);
 const exponentiate = (value, exponent = 2) => Math.pow(value, exponent);
@@ -66,15 +70,24 @@ const testPlugin = new MathBasePipe(100);
 DUMP && dumpObject(testPlugin)
 MathBasePipe.addPlugin(dec, 'dec');
 DUMP && dumpObject(testPlugin)// dec registered in MathBasePipe now
-const testPluginEnd = testPlugin.sum(900).divide(3).dec(2).end();
+const testPluginEnd =
+	testPlugin
+	.sum(900)
+	.divide(3)
+	.dec(2)
+	.end();
 console.log(testPluginEnd)
 
 
-const square = (value) => value*value
+const square = (value) => value * value
 // extend the existing MathBasePipe
 const extendedMathPipe = extendPipelineClass(MathBasePipe, [ square ]);
 const extendedMathInstance = new extendedMathPipe(33);
 DUMP && dumpObject(extendedMathInstance)
 
-const extendedMathResult = extendedMathInstance.sum(5).square().end()
+const extendedMathResult =
+	extendedMathInstance
+		.sum(5)
+		.square()
+		.end()
 console.log(extendedMathResult)// 1444 :)))) LOOKS GOOD
