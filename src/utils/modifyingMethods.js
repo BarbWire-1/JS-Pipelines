@@ -39,7 +39,8 @@ const modifyingMethods = [
 	// WeakMap and WeakSet methods
 	"set",
 	"delete",
-	"add"
+	"add",
+
 ];
 
 export default function isModifyingMethod(methodName) {

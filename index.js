@@ -3,10 +3,10 @@
 /* MIT License
 * Copyright(c) 2025 Barbara Kälin
 */
-import { BasePipeline, createBasePipeline, extendPipeline } from "./src/Pipeline.js";
+import { BasePipeline, createPipelineClass, extendPipelineClass } from "./src/Pipeline.js";
 import { logUncaught, getProps, dumpObject } from "./devUtils/debug.js";
 
-globalThis.LOGPROPS = false;
+globalThis.DUMP = false;
 globalThis.DEVMODE = true;
 
 // log all uncaught errors with stack in DEVMOE
@@ -15,10 +15,10 @@ globalThis.DEVMODE && logUncaught()
 // simple BasePipeline NO plugins - only chaining on add()
 
 
-const testBasePipe = new BasePipeline([15, 28, 2.4,99])
+const testBasePipe = new BasePipeline([ 15, 28, 2.4, 99 ])
 const testBasePipeEnd = testBasePipe.add(arr => arr.map(n => n * 2)).add(arr => arr.map(n => parseInt(n))).end();
 console.log({ testBasePipeEnd })//[30, 56, 4, 198]
-LOGPROPS && dumpObject(testBasePipe)
+DUMP && dumpObject(testBasePipe)
 
 // 1. specialised BaseClass with some plugins on Pipeline
 
@@ -32,7 +32,7 @@ function divide(value, divisor = 1) {
 	if (divisor === 0) {
 		throw new Error('Division by zero is not possible.')
 	}
-	return this.add((value) => value / divisor);
+	return  value / divisor;
 }
 const root = (value, nthRoot = 2) => Math.pow(value, 1 / nthRoot);
 const exponentiate = (value, exponent = 2) => Math.pow(value, exponent);
@@ -41,13 +41,13 @@ const round = () => Math.round(value);
 const floor = () => Math.floor(value);
 const ceil = () => Math.ceil(value);
 
-const mathPlugins = [sum, substract, multiply, divide, root, exponentiate, log, round, floor, ceil]
+const mathPlugins = [ sum, substract, multiply, divide, root, exponentiate, log, round, floor, ceil ]
 
-const MathBasePipe = extendPipeline(BasePipeline, mathPlugins)
+const MathBasePipe = extendPipelineClass(BasePipeline, mathPlugins)
 
 const testMathBasePipe = new MathBasePipe(20)
-LOGPROPS && dumpObject(testMathBasePipe)
-const testMathBasePipeEnd = testMathBasePipe.sum(5).end()
+DUMP && dumpObject(testMathBasePipe)
+const testMathBasePipeEnd = testMathBasePipe.sum(5).divide(10).end()
 console.log({ testMathBasePipeEnd })
 
 // checkInheritance
@@ -58,12 +58,13 @@ const test = new BasePipeline(20);
 // add another Plugin to the class
 // MathBasePipe.addPlugin() // throws correctly for missing methodName
 // define a ne MathPlugin
-const dec = (value, decimals = 2) => value.toFixed(decimals);
+const dec = (value, decimals) => value.toFixed(decimals);
 
 
 const testPlugin = new MathBasePipe(100);
 
-LOGPROPS && dumpObject(testPlugin)// dec not correctly added - in list ''
+DUMP && dumpObject(testPlugin)// dec not correctly added - in list ''
 MathBasePipe.addPlugin(dec, 'dec');
-LOGPROPS && dumpObject(testPlugin)// all MathPipeline props gone :(((((
-//const testPluginEnd = testPlugin.sum(900).dec()// - not a function :(
+DUMP && dumpObject(testPlugin)// dec registered in MathBasePipe now, but not correct chaining - but WHY
+const testPluginEnd = testPlugin.sum(900).divide(3).dec(2).end();
+console.log(testPluginEnd)

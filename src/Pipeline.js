@@ -40,23 +40,7 @@ class Pipeline {
 
 	// TODO what is wrong in here?? Not correctly registering manually added plugins on clas
 	// add custom methods dynamically to the instance prototype
-	static addPlugin(method, methodName = null) {
-		console.log({method})
-		try {
-			const name = methodName || method.name;
-			console.log({name})
-		} catch(e){
-			throw new Error(
-				"Method name is required for plugin registration.",
-				e.stack
-			);
-		}
 
-		this.prototype[ name ] = function (...args) {
-			return this.add(method, ...args);
-		};
-		console.log(this.prototype[ name ])
-	}
 
 	// expose value
 	get value() {
@@ -88,7 +72,7 @@ class Pipeline {
 
 // TODO TO TEST FOR INHERITANCE -create new testCases relying on this structure
 // Function to create a base pipeline class and wrap it in a Proxy
-function createBasePipeline(BasePipeline) {
+function createPipelineClass(BasePipeline) {
 
 	return class extends BasePipeline {
 		constructor (value) {
@@ -100,14 +84,24 @@ function createBasePipeline(BasePipeline) {
 
 
 
+
 }
 }
 
 // Function to extend an existing pipeline class with additional plugins (to be added to the class itself)
-function extendPipeline(BasePipeline, classPlugins = []) {
+function extendPipelineClass(BasePipeline, classPlugins = []) {
 	class ExtendedPipeline extends BasePipeline {
 		constructor (value) {
 			super(value); // Call the constructor of the base class
+		}
+		// Method to manually ad Plugins after instantiation
+		static addPlugin(method) {
+
+			ExtendedPipeline.prototype[ method.name ] = function (...args) {
+				return this.add(method, ...args);
+
+			};
+
 		}
 	}
 
@@ -115,13 +109,14 @@ function extendPipeline(BasePipeline, classPlugins = []) {
 	classPlugins.length && classPlugins.forEach((plugin) => {
 		ExtendedPipeline.prototype[ plugin.name ] = function (...args) {
 			return this.add(plugin, ...args);
-		};; // Add each plugin to the class's prototype
+		};
 	});
+
 
 	return ExtendedPipeline;
 }
 
-// return BasePipeline only??
 
-const BasePipeline = createBasePipeline(Pipeline)
-export { BasePipeline,  createBasePipeline, extendPipeline }
+
+const BasePipeline = createPipelineClass(Pipeline)
+export { BasePipeline,  createPipelineClass, extendPipelineClass }

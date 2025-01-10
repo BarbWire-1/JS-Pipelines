@@ -41,7 +41,7 @@ function logUncaught() {
 
 // check the props in pipelines
 function getProps(obj) {
-	if (!globalThis.LOGPROPS) return;
+	if (!globalThis.DUMP) return;
 	const ownProps = Object.getOwnPropertyNames(obj);
 	console.log({ ownProps });
 	const prototypeProps = Object.getOwnPropertyNames(
@@ -88,4 +88,4 @@ function dumpObject(instance) {
 }
 
 
-export { logUncaught, devlog, getProps, dumpObject}
+export { logUncaught, devlog, getProps, dumpObject }

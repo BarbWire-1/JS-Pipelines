@@ -5,16 +5,19 @@ import isModifyingMethod from './utils/modifyingMethods.js';
 // TODO not tested yet on modiying methods of all types
 export const pipelineHandler = {
 	get: (target, prop) => {
+		//console.log(prop)
 		// traverse prototype chain to find the property/method
 		let currentTarget = target;
 		while (currentTarget !== null) {
 			if (prop in currentTarget) {
+
 				const propValue = currentTarget[ prop ];
 
 				//  modifying method, return the chaining behavior
 				if (typeof propValue === 'function' && isModifyingMethod(prop)) {
+
 					return (...args) => {
-						const result = propValue.apply(target, args);  // apply to target instance
+						propValue.apply(target, args);  // apply to target instance
 						return target; // Allow chaining
 					};
 				}
