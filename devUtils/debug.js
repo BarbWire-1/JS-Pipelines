@@ -47,6 +47,41 @@ function getProps(obj) {
 	// merge own and inherited props
 	return [ ...new Set([ ...ownProps, ...prototypeProps ]) ];
 }
+// check all chain
+function dumpClassAndInstance(instance) {
+	// Dump instance properties and its prototype chain
+	console.log("=== Instance Properties ===");
+	console.log(instance);
+
+	let current = instance;
+	let depth = 0;
+
+	while (current) {
+		console.log(
+			`Prototype chain depth ${depth}:`,
+			Object.getOwnPropertyNames(current)
+		);
+		current = Object.getPrototypeOf(current);
+		depth++;
+	}
+
+	// Dump class prototype chain
+	const classPrototype = Object.getPrototypeOf(instance.constructor);
+	console.log("\n=== Class Prototype ===");
+	console.log(classPrototype);
+
+	current = classPrototype;
+	depth = 0;
+
+	while (current) {
+		console.log(
+			`Class prototype chain depth ${depth}:`,
+			Object.getOwnPropertyNames(current)
+		);
+		current = Object.getPrototypeOf(current);
+		depth++;
+	}
+}
 
 
-export { DEVMODE, devlog, getProps }
+export { DEVMODE, devlog, getProps, dumpClassAndInstance }

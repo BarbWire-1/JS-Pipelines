@@ -1,8 +1,11 @@
 /* MIT License
 * Copyright(c) 2025 Barbara Kälin
 */
-// TODO add in debug again to check intermediate - execute in end() only!
+//  TODO add in debug again to check intermediate - execute in end() only!
+//  TODO 1.1.1 store sync/async of method in queue in add, then later switch execution methodBased, if asyncInProgres resume any further metho from being processed until resolved - coul expose resume/continue for regulation (??)
 
+
+// TODO change to static methods passing this in constructor ffor all internal?
 export class CorePipeline {
 	constructor (value) {
 
@@ -22,8 +25,8 @@ export class CorePipeline {
 
 		// TODO hm maybe just expose asyncAdd when cleaning
 		// Mark pipeline as async if any async method
-		if (!this._isAsync) {
-			this.#detectAsync(method)
+		if (!this._isAsync && this.#detectAsync(method)) {
+			this._isAsync = true;
 		}
 
 		this._queue.push({ method, args });
@@ -132,8 +135,8 @@ export class CorePipeline {
 		const { method, args } = this._queue.shift();
 		let result = method(this._value, ...args);
 
-		// wrap subsequent sync functions async to chain on prev Promise
-		if (!(result instanceof Promise)) {
+		// wrap subsequent sync functions async to chain on prev Promise - for now (!!!)
+		if (!this.#detectAsync(method)) {
 			result = Promise.resolve(result);
 		}
 
@@ -161,7 +164,7 @@ export class CorePipeline {
 		const isExplicitAsync = method.constructor.name === "AsyncFunction";
 
 		if (isExplicitAsync) {
-			this._isAsync = true;
+			return true;
 		} else {
 
 			const isUsingPromise = method.toString()
@@ -169,9 +172,10 @@ export class CorePipeline {
 				.replace(/(['"`]).*?\1/g, '') // remove strings inside function
 				.includes("Promise");
 
-			if (isUsingPromise) this._isAsync = true;
+			isUsingPromise ? true : false;
 
 		}
+
 	}
 
 	get value() {

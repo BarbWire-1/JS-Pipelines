@@ -3,8 +3,8 @@
 /* MIT License
 * Copyright(c) 2025 Barbara Kälin
 */
-import { createPipeline, Pipeline } from "./src/Pipeline.js";
-import { getProps } from "./devUtils/debug.js";
+import { createPipeline, Pipeline} from "./src/Pipeline.js";
+import { getProps,dumpClassAndInstance } from "./devUtils/debug.js";
 
 globalThis.LOGPROPS = false;
 globalThis.DEVMODE = true;
@@ -329,14 +329,14 @@ function asyncMultiply(value, factor) {
 // seems circular on _handler - check and fix that!
 // OOOOOOOOH.... as returning value at end?? - new Proxy oesn't fix it either
 // Using the pipeline with async functions
-// const asyncPipeline = new MathPipeline(1000000000);
-// LOGPROPS && console.log(getProps(asyncPipeline))
-//
-// asyncPipeline
-// 	.add(asyncAdd, 50) // asyncAdd: 1000000000 + 50
-// 	.add(asyncMultiply, 2) // asyncMultiply: 1000000050 * 2
-//
-//
+const asyncPipeline = new MathPipeline(1000000000);
+LOGPROPS && console.log(getProps(asyncPipeline))
+
+asyncPipeline
+	.add(asyncAdd, 50) // asyncAdd: 1000000000 + 50
+	.add(asyncMultiply, 2) // asyncMultiply: 1000000050 * 2
+
+
 // // Use .then() to log the resolved value
 // //asyncPipeline.end().then((result) => {
 // //     console.log("Async result:", result); // Output: 2000000100
@@ -420,3 +420,5 @@ async function processNextOperations() {
 
 // Execute the async operations
 processNextOperations();
+
+LOGPROPS && dumpClassAndInstance(MathPipeline)// here chain is broken by extending
